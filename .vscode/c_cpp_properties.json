@@ -8,8 +8,8 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "C:/Users/mitch/Desktop/CAN Triple 022226/CAN_Triple/Projects/Generic Example - Development/include",
-                "C:/Users/mitch/Desktop/CAN Triple 022226/CAN_Triple/Projects/Generic Example - Development/src",
+                "C:/Users/mitch/Desktop/CAN-Triple-Haltech-Integration/include",
+                "C:/Users/mitch/Desktop/CAN-Triple-Haltech-Integration/src",
                 "C:/Users/mitch/.platformio/packages/framework-stm32cubeg4/Drivers/CMSIS/Include",
                 "C:/Users/mitch/.platformio/packages/framework-stm32cubeg4/Drivers/CMSIS/Device/ST/STM32G4xx/Include",
                 "C:/Users/mitch/.platformio/packages/framework-stm32cubeg4/Drivers/STM32G4xx_HAL_Driver/Inc",
@@ -54,8 +54,8 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "C:/Users/mitch/Desktop/CAN Triple 022226/CAN_Triple/Projects/Generic Example - Development/include",
-                    "C:/Users/mitch/Desktop/CAN Triple 022226/CAN_Triple/Projects/Generic Example - Development/src",
+                    "C:/Users/mitch/Desktop/CAN-Triple-Haltech-Integration/include",
+                    "C:/Users/mitch/Desktop/CAN-Triple-Haltech-Integration/src",
                     "C:/Users/mitch/.platformio/packages/framework-stm32cubeg4/Drivers/CMSIS/Include",
                     "C:/Users/mitch/.platformio/packages/framework-stm32cubeg4/Drivers/CMSIS/Device/ST/STM32G4xx/Include",
                     "C:/Users/mitch/.platformio/packages/framework-stm32cubeg4/Drivers/STM32G4xx_HAL_Driver/Inc",
