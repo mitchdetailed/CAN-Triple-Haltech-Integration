@@ -7,20 +7,23 @@
 // Uncomment what peripherals you want to use //
 
 #define HALTECH_CAN CAN_1
-#define ENABLE_ECU
-#define ENABLE_IO12A
-#define ENABLE_IO12B
-#define ENABLE_IO16A
-#define ENABLE_IO16B
-#define ENABLE_PD16A
-#define ENABLE_PD16B
-#define ENABLE_PD16C
-#define ENABLE_PD16D
-#define ENABLE_TCA4A
-#define ENABLE_TCA4B
-#define ENABLE_TCA2A
-#define ENABLE_TCA2B
-#define ENABLE_TMS4
+//#define ENABLE_ECU
+//#define ENABLE_IO12A
+//#define ENABLE_IO12B
+//#define ENABLE_IO16A
+//#define ENABLE_IO16B
+//#define ENABLE_PD16A
+//#define ENABLE_PD16B
+//#define ENABLE_PD16C
+//#define ENABLE_PD16D
+//#define ENABLE_TCA4A
+//#define ENABLE_TCA4B
+//#define ENABLE_TCA2A
+//#define ENABLE_TCA2B
+//#define ENABLE_TMS4
+
+
+
 // 3rd Party CAN Implementations
 #define THIRDPARTYCAN CAN_3
 
