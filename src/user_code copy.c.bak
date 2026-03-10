@@ -1,0 +1,812 @@
+/*
+ * user_code.c - All User Code should be applied here unless specified
+ * otherwise.
+ *
+ */
+
+#define HALTECH_CAN CAN_1 //
+
+/* File Includes */
+#include "user_code.h"
+#include "backend_functions.h"
+#include "main.h"
+#include "snprintf.h"
+#include "stm32g4xx_hal.h"
+#include <string.h>
+
+/* End File Includes */
+
+/* Variable Declarations */
+
+typedef struct {
+  float Absolute_Humidity_gm3;
+  float Accel_Pedal_Position_percent;
+  float Air_Temperature_degc;
+  float Ambient_Air_Temperature_degc;
+  float Aux_1_Fuel_Pump_Duty_percent;
+  float Aux_2_Fuel_Pump_Duty_percent;
+  float Aux_3_Fuel_Pump_Duty_percent;
+  float Barometric_Pressure_kPa;
+  float Battery_Voltage_v;
+  float Boost_Control_Output_percent;
+  float Brake_Pressure_Front_Ratio_percent;
+  float Brake_Pressure_Rear_Ratio_percent;
+  float Brake_Pressure_Rear_kPa;
+  float Brake_Pressure_Front_kPa;
+  float Calculated_Air_Temp_degc;
+  float Coolant_Pressure_kPa;
+  float Coolant_Temperature_degc;
+  float Crankcase_Pressure_kPa;
+  float Cruise_Error_kmh;
+  float Cruise_Last_Target_kmh;
+  float Cruise_Target_kmh;
+  float Cut_Percentage_percent;
+  float Damper_FL_Raw_mm;
+  float Damper_FL_mm;
+  float Damper_FR_Raw_mm;
+  float Damper_FR_mm;
+  float Damper_RL_Raw_mm;
+  float Damper_RL_mm;
+  float Damper_RR_Raw_mm;
+  float Damper_RR_mm;
+  float Diff_Oil_Temperature_degc;
+  float ECU_Temperature_degc;
+  float EGT_10_degc;
+  float EGT_11_degc;
+  float EGT_12_degc;
+  float EGT_1_degc;
+  float EGT_2_degc;
+  float EGT_3_degc;
+  float EGT_4_degc;
+  float EGT_5_degc;
+  float EGT_6_degc;
+  float EGT_7_degc;
+  float EGT_8_degc;
+  float EGT_9_degc;
+  float Engine_Demand_percent;
+  float Exh_Cam_Angle_1_deg;
+  float Exh_Cam_Angle_2_deg;
+  float Exhuast_Manifold_Pressure_kPa;
+  float FL_TPMS_Voltage_v;
+  float FL_Tire_Pressure_kPa;
+  float FR_TPMS_Voltage_v;
+  float FR_Tire_Pressure_kPa;
+  float Front_Tire_Pres_Target_kPa;
+  float Fuel_Composition_percent;
+  float Fuel_Level_liters;
+  float Fuel_Pressure_kPa;
+  float Fuel_Temperature_degc;
+  float Gearbox_Line_Pressure_kPa;
+  float Gearbox_Oil_Temperature_degc;
+  float Generic_Output_1_DC_percent;
+  float Generic_Sensor_10;
+  float Generic_Sensor_1;
+  float Generic_Sensor_2;
+  float Generic_Sensor_3;
+  float Generic_Sensor_4;
+  float Generic_Sensor_5;
+  float Generic_Sensor_6;
+  float Generic_Sensor_7;
+  float Generic_Sensor_8;
+  float Generic_Sensor_9;
+  float Ignition_Angle_Bank_1_deg;
+  float Ignition_Angle_Bank_2_deg;
+  float Ignition_Angle_deg;
+  float Inj_Differential_Pressure_kPa;
+  float Inj_Stage_3_DC_percent;
+  float Inj_Stage_4_DC_percent;
+  float Inj_Stg_1_DC_percent;
+  float Inj_Stg_2_DC_percent;
+  float Injection_Stage_1_Avg_Pulsewidth_ms;
+  float Injection_Stage_2_Avg_Pulsewidth_ms;
+  float Injection_Stage_3_Avg_Pulsewidth_ms;
+  float Injection_Stage_4_Avg_Pulsewidth_ms;
+  float Int_Cam_Angle_1_deg;
+  float Int_Cam_Angle_2_deg;
+  float Knock_Level_1_db;
+  float Knock_Level_2_db;
+  float LTFT_Bank_1_percent;
+  float LTFT_Bank_2_percent;
+  float Lambda_10;
+  float Lambda_11;
+  float Lambda_12;
+  float Lambda_1;
+  float Lambda_2;
+  float Lambda_3;
+  float Lambda_4;
+  float Lambda_5;
+  float Lambda_6;
+  float Lambda_7;
+  float Lambda_8;
+  float Lambda_9;
+  float Lambda_Bank_1;
+  float Lambda_Bank_2;
+  float Lambda_Overall;
+  float Lateral_G_ms2;
+  float Launch_Control_Fuel_Enrich_percent;
+  float Launch_Control_Ignition_Retard_deg;
+  float Longitudinal_G_ms2;
+  float Manifold_Pressure_kPa;
+  float No2_Pressure_Sensor_1_kPa;
+  float No2_Pressure_Sensor_2_kPa;
+  float No2_Pressure_Sensor_3_kPa;
+  float No2_Pressure_Sensor_4_kPa;
+  float Oil_Pressure_kPa;
+  float Oil_Temperature_degc;
+  float Pitch_Rate_degsec;
+  float Primary_Fuel_Pump_Duty_percent;
+  float RL_TPMS_Voltage_v;
+  float RL_Tire_Pressure_kPa;
+  float RR_TPMS_Voltage_v;
+  float RR_Tire_Pressure_kPa;
+  float Rear_Tire_Pres_Target_kPa;
+  float Relative_Humidity_percent;
+  float Roll_Rate_degsec;
+  float STFT_Bank_1_percent;
+  float STFT_Bank_2_percent;
+  float Steering_Wheel_Angle;
+  float Target_Boost_Level_kPa;
+  float Target_Lambda;
+  float Throttle_Position_percent;
+  float TqMgmt_Combined_Ign_Corr_deg;
+  float TqMgmt_DS_Target_Err_Ign_Corr_deg;
+  float TqMgmt_DS_Timed_Ign_Corr_deg;
+  float Turbo_Speed_Sensor_2_rpm;
+  float Vehicle_Speed_kmh;
+  float Vertical_G_ms2;
+  float Wastegate_Pressure_kPa;
+  float Water_Inj_Adv_Solenoid_Duty_percent;
+  float Wheel_Diff_kmh;
+  float Wheel_Slip_kmh;
+  float Wheel_Speed_FL_kmh;
+  float Wheel_Speed_FR_kmh;
+  float Wheel_Speed_RL_kmh;
+  float Wheel_Speed_RR_kmh;
+  float Yaw_Rate_degsec;
+  uint32_t FL_Tire_Temp_degc;
+  uint32_t FR_Tire_Temp_degc;
+  uint32_t RL_Tire_Temp_degc;
+  uint32_t RR_Tire_Temp_degc;
+  uint32_t Race_Timer_ms;
+  uint32_t Specific_Humidity_ppm;
+  uint32_t Total_Fuel_Used_cc;
+  uint32_t Turbo_Speed_Sensor_1_rpm;
+  int32_t Fuel_Used_Since_Trip1_Reset;
+  int32_t TqMgmt_DS_Error_rpm;
+  int32_t TqMgmt_DS_Target_rpm;
+  int32_t Trip_Meter_1;
+  uint16_t Cruise_Control_Input_State;
+  uint16_t Driveshaft_RPM;
+  uint16_t Engine_Limiter_Max_RPM;
+  uint16_t Engine_Protection_DTC;
+  uint16_t Engine_Speed_rpm;
+  uint16_t Fuel_Flow_Return_ccmin;
+  uint16_t Fuel_Flow_ccmin;
+  uint16_t Launch_Control_End_rpm;
+  uint16_t Trigger_Counter;
+  uint16_t Trigger_Sync_Level;
+  uint16_t Trigger_System_Error_Count;
+  int16_t Brake_Pressure_Difference_kPa;
+  uint8_t Cruise_Controller_State;
+  uint8_t Cut_Percentage_Function;
+  uint8_t Cut_Percentage_Method;
+  uint8_t Engine_Limiter_Function;
+  uint8_t Engine_Limiter_Method;
+  uint8_t Engine_Protection_Level;
+  uint8_t RPM_Limiter_Function;
+  uint8_t RPM_Limiter_Method;
+  uint8_t Turbo_Timer_Eng_Sec_Remaining;
+  uint8_t Turbo_Timer_Sec_Remaining;
+  int8_t Exhaust_Cutout_State;
+  int8_t Gear;
+  int8_t Gear_Selector_Position;
+  int8_t Generic_Open_Loop_Motor_1_State;
+  int8_t Generic_Open_Loop_Motor_2_State;
+  int8_t Generic_Open_Loop_Motor_3_State;
+  int8_t Nitrous_Bottle_Opener_State;
+  int8_t Rotary_Trimpot_1;
+  int8_t Rotary_Trimpot_2;
+  int8_t Rotary_Trimpot_3;
+  int8_t TqMgmt_Knob;
+  bool ABS_Active;
+  bool ABS_Armed;
+  bool ABS_Error;
+  bool Aircon_Output;
+  bool Aircon_Request;
+  bool Antilag_Output_State;
+  bool Antilag_Switch_State;
+  bool Aux_1_Fuel_Pump_Output_State;
+  bool Aux_2_Fuel_Pump_Output_State;
+  bool Aux_3_Fuel_Pump_Output_State;
+  bool Aux_RPM_Limiter_Active;
+  bool Battery_Light_Active;
+  bool Brake_Pedal_Switch;
+  bool Check_Engine_Light;
+  bool Clutch_Switch;
+  bool Decel_Cut_Active;
+  bool Engine_Limiting_Active;
+  bool FL_Tire_Leaking;
+  bool FR_Tire_Leaking;
+  bool Flat_Shift_Switch;
+  bool Gear_Switch;
+  bool Generic_Output_10_State;
+  bool Generic_Output_11_State;
+  bool Generic_Output_12_State;
+  bool Generic_Output_13_State;
+  bool Generic_Output_14_State;
+  bool Generic_Output_15_State;
+  bool Generic_Output_16_State;
+  bool Generic_Output_17_State;
+  bool Generic_Output_18_State;
+  bool Generic_Output_19_State;
+  bool Generic_Output_1_State;
+  bool Generic_Output_20_State;
+  bool Generic_Output_2_State;
+  bool Generic_Output_3_State;
+  bool Generic_Output_4_State;
+  bool Generic_Output_5_State;
+  bool Generic_Output_6_State;
+  bool Generic_Output_7_State;
+  bool Generic_Output_8_State;
+  bool Generic_Output_9_State;
+  bool HandBrake_State;
+  bool Head_Light_State;
+  bool High_Beam_Light_State;
+  bool Ignition_Switch;
+  bool Launch_Control_Active;
+  bool Launch_Control_Switch;
+  bool Left_Indicator_State;
+  bool Neutral_Switch;
+  bool Nitrous_Enable_1_Output_State;
+  bool Nitrous_Enable_1_Switch_State;
+  bool Nitrous_Enable_2_Output_State;
+  bool Nitrous_Enable_2_Switch_State;
+  bool Nitrous_Enable_3_Output_State;
+  bool Nitrous_Enable_3_Switch_State;
+  bool Nitrous_Enable_4_Output_State;
+  bool Nitrous_Enable_4_Switch_State;
+  bool Nitrous_Override_1_Output_State;
+  bool Nitrous_Override_1_Switch_State;
+  bool Nitrous_Override_2_Output_State;
+  bool Nitrous_Override_2_Switch_State;
+  bool Nitrous_Override_3_Output_State;
+  bool Nitrous_Override_3_Switch_State;
+  bool Nitrous_Override_4_Output_State;
+  bool Nitrous_Override_4_Switch_State;
+  bool Nitrous_Stage_2_Outout;
+  bool Nitrous_Stage_3_Output;
+  bool Nitrous_Stage_4_Outout;
+  bool Nitrous_Stage_5_Outout;
+  bool Nitrous_Stage_6_Output;
+  bool Nitrous_Stsge_1_Output;
+  bool Oil_Pressure_Light;
+  bool Park_Light_State;
+  bool Pit_Limiter_Active;
+  bool Pit_Limiter_Error;
+  bool Pit_Limiter_Switch_State;
+  bool Primary_Fuel_Pump_Output_State;
+  bool RL_Tire_Leaking;
+  bool RR_Tire_Leaking;
+  bool Reverse_Switch;
+  bool Right_Indicator_state;
+  bool Rolling_Antilag_Switch_State;
+  bool ThermoFan_1_On;
+  bool ThermoFan_2_On;
+  bool ThermoFan_3_On;
+  bool ThermoFan_4_On;
+  bool Torque_Reduction_Active;
+  bool Traction_Control_Active;
+  bool Traction_Control_Enabled;
+  bool Traction_Control_Light;
+  bool Traction_Control_Switch_State;
+  bool Transient_Throttle_Active;
+  bool Water_Inj_Adv_Enable_Out_State;
+  bool Water_Inj_Adv_Enable_Sw_State;
+  bool Water_Inj_Adv_Override_Out_State;
+  bool Water_Inj_Adv_Override_Sw_State;
+} HaltechECUSignals_t;
+
+typedef struct {
+  HaltechECUSignals_t ECU;
+
+} HaltechEcosystem_t;
+
+static HaltechEcosystem_t Haltech;
+
+/* Startup Functions */
+
+void events_Startup() {
+  setupCANbus(CAN_1, 1000000, NORMAL_MODE); // Set up as Haltech CAN Bus
+  setupCANbus(CAN_2, 1000000, NORMAL_MODE);
+  setupCANbus(CAN_3, 1000000, NORMAL_MODE);
+  setCAN_Termination(CAN_1, true);
+  setCAN_Termination(CAN_2, true);
+  setCAN_Termination(CAN_3, true);
+  startCANbus(CAN_1);
+  startCANbus(CAN_2);
+  startCANbus(CAN_3);
+}
+
+/* End Startup Functions */
+
+//-----------------------------//
+//-----------------------------//
+//-----------------------------//
+
+void onSerialReceive(uint8_t *serialMessage) {
+  // What do you want to do when you receive a UART message.. ?
+  // printf("%07.4f message received...\r\n",getTimestamp());
+}
+
+void onReceive(CAN_Message Message) {
+  // What do you want to do when you receive a CAN message.. ?
+  if (Message.Bus == CAN_1) {
+  }
+
+  if (Message.Bus == CAN_2) {
+  }
+
+  if (Message.Bus == CAN_3) {
+  }
+
+  if (Message.Bus == HALTECH_CAN) {
+    switch (Message.arbitration_id) {
+
+    case 0x360:
+      Haltech.ECU.Engine_Speed_rpm =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 1, 0, 0);
+      Haltech.ECU.Manifold_Pressure_kPa =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.1, 0, 1);
+      Haltech.ECU.Throttle_Position_percent =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 40, 8, 0.1, 0, 1);
+      Haltech.ECU.Coolant_Pressure_kPa =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 56, 16, 0.1, -101.3, 1);
+      break;
+
+    case 0x361:
+      Haltech.ECU.Fuel_Pressure_kPa =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.1, -101.3, 1);
+      Haltech.ECU.Oil_Pressure_kPa =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.1, -101.3, 1);
+      Haltech.ECU.Engine_Demand_percent =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 40, 16, 0.1, 0, 1);
+      Haltech.ECU.Wastegate_Pressure_kPa =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 56, 16, 0.1, -101.3, 1);
+      break;
+
+    case 0x362:
+      Haltech.ECU.Inj_Stg_1_DC_percent =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.1, 0, 1);
+      Haltech.ECU.Inj_Stg_2_DC_percent =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.1, 0, 1);
+      Haltech.ECU.Ignition_Angle_deg =
+          dbc_decode(Message.data, DBC_SIGNED, true, 40, 16, 0.1, 0, 1);
+      break;
+
+    case 0x363:
+      Haltech.ECU.Wheel_Slip_kmh =
+          dbc_decode(Message.data, DBC_SIGNED, true, 8, 16, 0.1, 0, 1);
+      Haltech.ECU.Wheel_Diff_kmh =
+          dbc_decode(Message.data, DBC_SIGNED, true, 24, 16, 0.1, 0, 1);
+      Haltech.ECU.Launch_Control_End_rpm =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 56, 16, 1, 0, 0);
+      break;
+
+    case 0x364:
+      Haltech.ECU.Injection_Stage_1_Avg_Pulsewidth_ms =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.001, 0, 3);
+      Haltech.ECU.Injection_Stage_2_Avg_Pulsewidth_ms =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.001, 0, 3);
+      Haltech.ECU.Injection_Stage_3_Avg_Pulsewidth_ms =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 40, 16, 0.001, 0, 3);
+      Haltech.ECU.Injection_Stage_4_Avg_Pulsewidth_ms =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 56, 16, 0.001, 0, 3);
+      break;
+
+    case 0x368:
+      Haltech.ECU.Lambda_1 =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.001, 0, 3);
+      Haltech.ECU.Lambda_2 =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.001, 0, 3);
+      Haltech.ECU.Lambda_3 =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 40, 16, 0.001, 0, 3);
+      Haltech.ECU.Lambda_4 =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 56, 16, 0.001, 0, 3);
+      break;
+
+    case 0x369:
+      Haltech.ECU.Trigger_System_Error_Count =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 1, 0, 0);
+      Haltech.ECU.Trigger_Counter =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 1, 0, 0);
+      Haltech.ECU.Trigger_Sync_Level =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 56, 16, 1, 0, 0);
+      break;
+
+    case 0x36A:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x36B:
+      Haltech.ECU.Brake_Pressure_Front_kPa =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 1, -101.3, 0);
+      Haltech.ECU.No2_Pressure_Sensor_1_kPa =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.22, -101.3, 1);
+      Haltech.ECU.Turbo_Speed_Sensor_1_rpm =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 40, 16, 10, 0, 0);
+      Haltech.ECU.Lateral_G_ms2 =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 56, 16, 0.1, 0, 1);
+      break;
+
+    case 0x36C:
+      Haltech.ECU.Wheel_Speed_FL_kmh =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.1, 0, 1);
+      Haltech.ECU.Wheel_Speed_FR_kmh =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.1, 0, 1);
+      Haltech.ECU.Wheel_Speed_RL_kmh =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 40, 16, 0.1, 0, 1);
+      Haltech.ECU.Wheel_Speed_RR_kmh =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 56, 16, 0.1, 0, 1);
+      break;
+
+    case 0x36D:
+      Haltech.ECU.Exh_Cam_Angle_1_deg =
+          dbc_decode(Message.data, DBC_SIGNED, true, 40, 16, 0.1, 0, 1);
+      Haltech.ECU.Exh_Cam_Angle_2_deg =
+          dbc_decode(Message.data, DBC_SIGNED, true, 56, 16, 0.1, 0, 1);
+      break;
+
+    case 0x36E:
+      Haltech.ECU.Engine_Limiting_Active =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 1, 0, 0);
+      Haltech.ECU.Launch_Control_Ignition_Retard_deg =
+          dbc_decode(Message.data, DBC_SIGNED, true, 24, 16, 0.1, 0, 1);
+      Haltech.ECU.Launch_Control_Ignition_Retard_deg =
+          dbc_decode(Message.data, DBC_SIGNED, true, 24, 16, 0.1, 0, 1);
+
+      break;
+
+      //--------------------------------------------------------------- Resume
+      //HERE ---------------------------------
+
+    case 0x36F:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x370:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x371:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x372:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x373:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x374:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x375:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x376:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x3E0:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x3E1:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x3E2:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x3E3:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x3E4:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x3E5:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x3E6:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x3E7:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x3E8:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x3E9:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x3EA:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x3EB:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x3EC:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x3ED:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x3EE:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x3EF:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x3F0:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x3F1:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x469:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x470:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x471:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x472:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x473:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x474:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x475:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x476:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x477:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x6F0:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x6F1:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x6F2:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x6F3:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x6F4:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x6F6:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x6F7:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    case 0x6F8:
+      Haltech.ECU.Knock_Level_1_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.01, 0, 2);
+      Haltech.ECU.Knock_Level_2_db =
+          dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.01, 0, 2);
+      break;
+
+    default:
+      break;
+    }
+  }
+}
+
+/* Run 2000Hz Functions here */
+void events_2000Hz() {}
+
+/* Run 1000Hz Functions here */
+void events_1000Hz() {}
+
+/* Run 500Hz Functions here */
+void events_500Hz() {}
+
+/* Run 200Hz Functions here */
+void events_200Hz() {}
+
+/* Run 100Hz Functions here */
+void events_100Hz() {}
+
+/* Run 50Hz Functions here */
+void events_50Hz() {}
+
+/* Run 20Hz Functions here */
+void events_20Hz() {}
+
+/* Run 10Hz Functions here */
+void events_10Hz() {}
+/* Run 5Hz Functions here */
+void events_5Hz() { toggleLED(LED_1); }
+
+/* Run 2Hz Functions here */
+void events_2Hz() {}
+
+/* Run 1Hz Functions here */
+void events_1Hz() {}
