@@ -4,7 +4,6 @@
  */
 
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
@@ -38,11 +37,11 @@ struct q_CAN3_Msg
 	uint8_t data[CAN3_DATALENGTH];
 };
 
-// CAN RX Queue
-uint16_t can1_Rx_qHead = 0;
-uint16_t can1_Rx_qTail = 0;
+// CAN RX Queue — head/tail/elements written in ISR, must be volatile
+volatile uint16_t can1_Rx_qHead = 0;
+volatile uint16_t can1_Rx_qTail = 0;
 struct q_CAN1_Msg can1_Rx_qData[CAN1_RX_MSG_BUFFER_SIZE];
-uint16_t can1_Rx_qElements = 0;
+volatile uint16_t can1_Rx_qElements = 0;
 
 // CAN 1 TX Queue
 uint16_t can1_Tx_qHead = 0;
@@ -50,11 +49,11 @@ uint16_t can1_Tx_qTail = 0;
 struct q_CAN1_Msg can1_Tx_qData[CAN1_TX_MSG_BUFFER_SIZE];
 uint16_t can1_Tx_qElements = 0;
 
-// CAN 2 RX Queue
-uint16_t can2_Rx_qHead = 0;
-uint16_t can2_Rx_qTail = 0;
+// CAN 2 RX Queue — head/tail/elements written in ISR, must be volatile
+volatile uint16_t can2_Rx_qHead = 0;
+volatile uint16_t can2_Rx_qTail = 0;
 struct q_CAN2_Msg can2_Rx_qData[CAN2_RX_MSG_BUFFER_SIZE];
-uint16_t can2_Rx_qElements = 0;
+volatile uint16_t can2_Rx_qElements = 0;
 
 // CAN 2 TX Queue
 uint16_t can2_Tx_qHead = 0;
@@ -62,11 +61,11 @@ uint16_t can2_Tx_qTail = 0;
 struct q_CAN2_Msg can2_Tx_qData[CAN2_TX_MSG_BUFFER_SIZE];
 uint16_t can2_Tx_qElements = 0;
 
-// CAN 3 RX Queue
-uint16_t can3_Rx_qHead = 0;
-uint16_t can3_Rx_qTail = 0;
+// CAN 3 RX Queue — head/tail/elements written in ISR, must be volatile
+volatile uint16_t can3_Rx_qHead = 0;
+volatile uint16_t can3_Rx_qTail = 0;
 struct q_CAN3_Msg can3_Rx_qData[CAN3_RX_MSG_BUFFER_SIZE];
-uint16_t can3_Rx_qElements = 0;
+volatile uint16_t can3_Rx_qElements = 0;
 
 // CAN 3 TX Queue
 uint16_t can3_Tx_qHead = 0;
@@ -84,6 +83,8 @@ static uint8_t               CAN_TxData[CAN_MSG_MAX_DLC];
 
 bool storecompleted = false;
 
+/* Pending CAN reset flags set by ISR, processed in main loop via process_CAN_errors() */
+volatile uint8_t can_reset_pending = 0;
 StringArray array0 = { .array = {0}, .length = 0 };
 StringArray array1 = { .array = {0}, .length = 0 };
 uint8_t uart_array = 0;
@@ -729,7 +730,6 @@ void trigger_CAN_TX()
 		uint8_t can1_freelevel = HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan1);
 		CAN_TxHeader.TxFrameType = FDCAN_DATA_FRAME;
 		CAN_TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-		CAN_TxHeader.BitRateSwitch = FDCAN_BRS_ON;
 		CAN_TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
 		CAN_TxHeader.MessageMarker = 0;
 		while ((can1_freelevel > 0) && (can1_Tx_qElements > 0))
@@ -742,6 +742,7 @@ void trigger_CAN_TX()
 				CAN_TxHeader.DataLength = bytes_to_fdcan_dlc(can1_tx_bytes);
 			}
 			CAN_TxHeader.FDFormat = (can1_Tx_qData[can1_Tx_qTail].dlc > 8) ? FDCAN_FD_CAN : FDCAN_CLASSIC_CAN;
+			CAN_TxHeader.BitRateSwitch = (CAN_TxHeader.FDFormat == FDCAN_FD_CAN) ? FDCAN_BRS_ON : FDCAN_BRS_OFF;
 			memcpy(CAN_TxData, can1_Tx_qData[can1_Tx_qTail].data, can1_Tx_qData[can1_Tx_qTail].dlc);
 			HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &CAN_TxHeader, CAN_TxData);
 			can1_Tx_qTail = (can1_Tx_qTail + 1) & (CAN1_TX_MSG_BUFFER_SIZE - 1);
@@ -755,7 +756,6 @@ void trigger_CAN_TX()
 		uint8_t can2_freelevel = HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan2);
 		CAN_TxHeader.TxFrameType = FDCAN_DATA_FRAME;
 		CAN_TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-		CAN_TxHeader.BitRateSwitch = FDCAN_BRS_ON;
 		CAN_TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
 		CAN_TxHeader.MessageMarker = 0;
 		while ((can2_freelevel > 0) && (can2_Tx_qElements > 0))
@@ -768,6 +768,7 @@ void trigger_CAN_TX()
 				CAN_TxHeader.DataLength = bytes_to_fdcan_dlc(can2_tx_bytes);
 			}
 			CAN_TxHeader.FDFormat = (can2_Tx_qData[can2_Tx_qTail].dlc > 8) ? FDCAN_FD_CAN : FDCAN_CLASSIC_CAN;
+			CAN_TxHeader.BitRateSwitch = (CAN_TxHeader.FDFormat == FDCAN_FD_CAN) ? FDCAN_BRS_ON : FDCAN_BRS_OFF;
 			memcpy(CAN_TxData, can2_Tx_qData[can2_Tx_qTail].data, can2_Tx_qData[can2_Tx_qTail].dlc);
 			HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan2, &CAN_TxHeader, CAN_TxData);
 			can2_Tx_qTail = (can2_Tx_qTail + 1) & (CAN2_TX_MSG_BUFFER_SIZE - 1);
@@ -781,7 +782,6 @@ void trigger_CAN_TX()
 		uint8_t can3_freelevel = HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan3);
 		CAN_TxHeader.TxFrameType = FDCAN_DATA_FRAME;
 		CAN_TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-		CAN_TxHeader.BitRateSwitch = FDCAN_BRS_ON;
 		CAN_TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
 		CAN_TxHeader.MessageMarker = 0;
 		while ((can3_freelevel > 0) && (can3_Tx_qElements > 0))
@@ -794,6 +794,7 @@ void trigger_CAN_TX()
 				CAN_TxHeader.DataLength = bytes_to_fdcan_dlc(can3_tx_bytes);
 			}
 			CAN_TxHeader.FDFormat = (can3_Tx_qData[can3_Tx_qTail].dlc > 8) ? FDCAN_FD_CAN : FDCAN_CLASSIC_CAN;
+			CAN_TxHeader.BitRateSwitch = (CAN_TxHeader.FDFormat == FDCAN_FD_CAN) ? FDCAN_BRS_ON : FDCAN_BRS_OFF;
 			memcpy(CAN_TxData, can3_Tx_qData[can3_Tx_qTail].data, can3_Tx_qData[can3_Tx_qTail].dlc);
 			HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan3, &CAN_TxHeader, CAN_TxData);
 			can3_Tx_qTail = (can3_Tx_qTail + 1) & (CAN3_TX_MSG_BUFFER_SIZE - 1);
@@ -822,11 +823,27 @@ void HAL_FDCAN_ErrorStatusCallback(FDCAN_HandleTypeDef* hfdcan, uint32_t ErrorSt
 			if (canTxErrorCount > 240 || canRxErrorCount > 120)
 			{
 				(*err_ctx[i].reset_counter)++;
-				resetCAN(err_ctx[i].bus);
+				/* Do not call resetCAN() directly from ISR — defer to main loop */
+				can_reset_pending |= (uint8_t)err_ctx[i].bus;
 			}
 			break;
 		}
 	}
+}
+
+/**
+ * \brief Processes pending CAN resets deferred from the error ISR.
+ * Must be called from the main loop (not from ISR context).
+ */
+void process_CAN_errors(void)
+{
+	if (can_reset_pending == 0)
+		return;
+	__disable_irq();
+	uint8_t pending = can_reset_pending;
+	can_reset_pending = 0;
+	__enable_irq();
+	resetCAN((CAN_Bus)pending);
 }
 
 /**
@@ -1196,17 +1213,14 @@ float read_float_from_address(void* address)
 	return *(float*)address;
 }
 
-/* Read character array from address */
+/* Read character array from address — uses a static buffer to avoid heap allocation */
 char* read_char_array_from_address(const void* source, size_t length)
 {
-	char* dest = malloc(length * sizeof(char));
-	if (dest == NULL)
-	{
-		return NULL; // Allocation failed
-	}
-
-	const char* charSource = (const char*)source;
-	memcpy(dest, charSource, length);
+	/* Static buffer avoids malloc on an embedded target with no free(). */
+	static char dest[256];
+	if (length == 0 || length > sizeof(dest))
+		return NULL;
+	memcpy(dest, (const char*)source, length);
 	return dest;
 }
 
@@ -1249,7 +1263,7 @@ void writeFlash(uint32_t page, uint8_t* Data, uint16_t dataSize)
 		/* Fill EraseInit structure*/
 		EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
 		EraseInitStruct.Banks = FLASH_BANK_1;
-		EraseInitStruct.Page = 31;
+		EraseInitStruct.Page = page;
 		EraseInitStruct.NbPages = 1;
 
 		if (HAL_FLASHEx_Erase(&EraseInitStruct, &PAGEError) != HAL_OK)

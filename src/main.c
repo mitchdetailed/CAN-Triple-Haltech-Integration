@@ -57,19 +57,19 @@ DMA_HandleTypeDef hdma_usart1_rx;
 bool uart_abort = false;
 
 /* USER CODE BEGIN PV */
-uint32_t timercounter_d2000 = 0;
-uint8_t x2000Hz_trigger = 0;
-uint8_t x1000Hz_trigger = 0;
-uint8_t x500Hz_trigger = 0;
-uint8_t x200Hz_trigger = 0;
-uint8_t x100Hz_trigger = 0;
-uint8_t x50Hz_trigger = 0;
-uint8_t x20Hz_trigger = 0;
-uint8_t x10Hz_trigger = 0;
-uint8_t x5Hz_trigger = 0;
-uint8_t x2Hz_trigger = 0;
-uint8_t x1Hz_trigger = 0;
-uint32_t timestamp = 0;
+volatile uint32_t timercounter_d2000 = 0;
+volatile uint8_t x2000Hz_trigger = 0;
+volatile uint8_t x1000Hz_trigger = 0;
+volatile uint8_t x500Hz_trigger = 0;
+volatile uint8_t x200Hz_trigger = 0;
+volatile uint8_t x100Hz_trigger = 0;
+volatile uint8_t x50Hz_trigger = 0;
+volatile uint8_t x20Hz_trigger = 0;
+volatile uint8_t x10Hz_trigger = 0;
+volatile uint8_t x5Hz_trigger = 0;
+volatile uint8_t x2Hz_trigger = 0;
+volatile uint8_t x1Hz_trigger = 0;
+volatile uint32_t timestamp = 0;
 
 uint8_t rxBuffer[256];
 uint8_t processData = 0; // Flag to indicate data processing
@@ -148,6 +148,7 @@ int main(void)
   {
     trigger_CAN_RX();
     trigger_CAN_TX();
+    process_CAN_errors();
     if (dataReady)
     {
       if (uart_abort == false)
@@ -691,7 +692,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
   if (huart->Instance == USART1)
   {
     // Ensure Size does not exceed the buffer
-    if (Size <= 256)
+    if (Size < 256)
     {
       // Copy data from rxBuffer to dataBuffer
       memcpy(dataBuffer, rxBuffer, Size);

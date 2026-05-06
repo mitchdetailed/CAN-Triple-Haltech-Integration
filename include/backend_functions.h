@@ -102,6 +102,7 @@ uint8_t setupCAN_FDbus(CAN_Bus bus, uint32_t mainBitrate, uint32_t dataBitrate,
 uint8_t startCANbus(CAN_Bus bus);
 uint8_t stopCANbus(CAN_Bus bus);
 uint8_t resetCAN(CAN_Bus bus);
+void process_CAN_errors(void);
 uint8_t setCAN_Termination(CAN_Bus bus, bool activated);
 CAN_ErrorCounts getCANErrorCounts(CAN_Bus bus);
 
