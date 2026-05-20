@@ -15,7 +15,7 @@
 #ifndef INC_BACKEND_FUNCTIONS_H_
 #define INC_BACKEND_FUNCTIONS_H_
 
-extern uint32_t timestamp;
+extern volatile uint32_t timestamp;
 /* Variable Declarations */
 
 extern uint16_t can1Reset_counter;

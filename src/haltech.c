@@ -1798,6 +1798,8 @@ void haltech_CAN_Receive(CAN_Message Message) {
     case 0x370:
         Haltech.ECU.Vehicle_Speed_kmh =
             dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.1, 0, 1);
+        Haltech.ECU.CombinedGear = 
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 1, 0, 0);
         Haltech.ECU.Int_Cam_Angle_1_deg =
             dbc_decode(Message.data, DBC_SIGNED, true, 40, 16, 0.1, 0, 1);
         Haltech.ECU.Int_Cam_Angle_2_deg =
@@ -1864,6 +1866,22 @@ void haltech_CAN_Receive(CAN_Message Message) {
             dbc_decode(Message.data, DBC_UNSIGNED, true, 56, 16, 0.1, 0, 1);
         break;
 
+    case 0x377:
+        Haltech.ECU.Boost_Pressure_Pre_InterCooler_kPa = 
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.1, 0, 1);
+        break;
+    
+    case 0x380:
+        Haltech.ECU.Generic_Output_1_Duty_Percent = 
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 1, 0, 0);
+        Haltech.ECU.Generic_Output_2_Duty_Percent = 
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 1, 0, 0);
+        Haltech.ECU.Generic_Output_3_Duty_Percent = 
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 40, 16, 1, 0, 0);
+        Haltech.ECU.Generic_Output_4_Duty_Percent = 
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 56, 16, 1, 0, 0);
+        break;
+
     case 0x3E0:
         Haltech.ECU.Coolant_Temperature_degC =
             dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.1, -273.2, 1);
@@ -1882,11 +1900,19 @@ void haltech_CAN_Receive(CAN_Message Message) {
             dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.1, -273.2, 1);
         Haltech.ECU.Fuel_Composition_percent =
             dbc_decode(Message.data, DBC_UNSIGNED, true, 40, 16, 0.1, 0, 1);
+        Haltech.ECU.Pre_Intercooler_Temperature_degC =
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 56, 16, 0.1, -273.2, 1);
         break;
 
     case 0x3E2:
-        Haltech.ECU.Fuel_Level_liters =
+        Haltech.ECU.Fuel_Level_1_liters =
             dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.1, 0, 1);
+        Haltech.ECU.Fuel_Volume_Estimated_Flow_ccmin = 
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.1, 0, 1);
+        Haltech.ECU.Average_Fuel_Consumption_Mileage_KmL = 
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 40, 16, 0.1, 0, 1);
+        Haltech.ECU.Fuel_Level_2_liters = 
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 56, 16, 0.1, 0, 1);
         break;
 
     case 0x3E3:
@@ -2113,18 +2139,41 @@ void haltech_CAN_Receive(CAN_Message Message) {
 
     case 0x3F1:
         Haltech.ECU.Damper_FL_mm =
-            dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.1, 0, 1);
+            dbc_decode(Message.data, DBC_SIGNED, true, 8, 16, 0.1, 0, 1);
         Haltech.ECU.Damper_FR_mm =
-            dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.1, 0, 1);
+            dbc_decode(Message.data, DBC_SIGNED, true, 24, 16, 0.1, 0, 1);
         Haltech.ECU.Damper_RL_mm =
-            dbc_decode(Message.data, DBC_UNSIGNED, true, 40, 16, 0.1, 0, 1);
+            dbc_decode(Message.data, DBC_SIGNED, true, 40, 16, 0.1, 0, 1);
         Haltech.ECU.Damper_RR_mm =
-            dbc_decode(Message.data, DBC_UNSIGNED, true, 56, 16, 0.1, 0, 1);
+            dbc_decode(Message.data, DBC_SIGNED, true, 56, 16, 0.1, 0, 1);
+        break;
+
+    case 0x3F2:
+
+        Haltech.ECU.Ride_Height_Sensor_Front_mm = 
+            dbc_decode(Message.data, DBC_SIGNED, true, 8, 16, 1, 0, 0);
+        Haltech.ECU.Ride_Height_Sensor_Front_Raw_mm =
+            dbc_decode(Message.data, DBC_SIGNED, true, 24, 16, 1, 0, 0);
+        Haltech.ECU.Ride_Height_Sensor_Front_Derivative_mmdivs =
+            dbc_decode(Message.data, DBC_SIGNED, true, 40, 16, 1, 0, 0);
+        break;
+
+    case 0x3F3:
+        Haltech.ECU.Ride_Height_Sensor_Rear_mm = 
+            dbc_decode(Message.data, DBC_SIGNED, true, 8, 16, 1, 0, 0);
+        Haltech.ECU.Ride_Height_Sensor_Rear_Raw_mm =
+            dbc_decode(Message.data, DBC_SIGNED, true, 24, 16, 1, 0, 0);
+        Haltech.ECU.Ride_Height_Sensor_Rear_Derivative_mmdivs =
+            dbc_decode(Message.data, DBC_SIGNED, true, 40, 16, 1, 0, 0);
+        break;
+
         break;
 
     case 0x469:
         Haltech.ECU.ECU_Temperature_degC =
             dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.1, -273.2, 1);
+        Haltech.ECU.Oil_Level_percent = 
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 40, 16, 0.1, 0, 1);
         break;
 
     case 0x470:
@@ -2134,6 +2183,7 @@ void haltech_CAN_Receive(CAN_Message Message) {
             dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.001, 0, 3);
         Haltech.ECU.Lambda_Bank_2 =
             dbc_decode(Message.data, DBC_UNSIGNED, true, 40, 16, 0.001, 0, 3);
+            // ### TO DO :: SET UP GEAR Selector position as Enum
         Haltech.ECU.Gear_Selector_Position =
             dbc_decode(Message.data, DBC_SIGNED, true, 48, 8, 1, 0, 0);
         Haltech.ECU.Gear =
@@ -2156,10 +2206,30 @@ void haltech_CAN_Receive(CAN_Message Message) {
             dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.1, 0, 1);
         Haltech.ECU.Cruise_Error_kmh =
             dbc_decode(Message.data, DBC_UNSIGNED, true, 40, 16, 0.1, 0, 1);
+
+            // ### TO DO : Set up Cruise Controller State Enum
         Haltech.ECU.Cruise_Controller_State =
             dbc_decode(Message.data, DBC_UNSIGNED, true, 52, 4, 1, 0, 0);
-        Haltech.ECU.Cruise_Control_Input_State =
-            dbc_decode(Message.data, DBC_UNSIGNED, true, 56, 12, 1, 0, 0);
+        Haltech.ECU.Cruise_Control_Input_State.Disable =
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 56, 1, 1, 0, 0);
+        Haltech.ECU.Cruise_Control_Input_State.Enable =
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 57, 1, 1, 0, 0);
+        Haltech.ECU.Cruise_Control_Input_State.Cancel =
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 58, 1, 1, 0, 0);
+        Haltech.ECU.Cruise_Control_Input_State.Set =
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 59, 1, 1, 0, 0);
+        Haltech.ECU.Cruise_Control_Input_State.Resume =
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 60, 1, 1, 0, 0);
+        Haltech.ECU.Cruise_Control_Input_State.Accel =
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 61, 1, 1, 0, 0);
+        Haltech.ECU.Cruise_Control_Input_State.Decel =
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 62, 1, 1, 0, 0);
+        Haltech.ECU.Cruise_Control_Input_State.Increment =
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 63, 1, 1, 0, 0);
+        Haltech.ECU.Cruise_Control_Input_State.Decrement =
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 48, 1, 1, 0, 0);
+        Haltech.ECU.Cruise_Control_Input_State.RestingPosition =
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 49, 1, 1, 0, 0);
         break;
 
     case 0x473:
@@ -2227,7 +2297,7 @@ void haltech_CAN_Receive(CAN_Message Message) {
 
     case 0x474:
         Haltech.ECU.Vertical_G_ms2 =
-            dbc_decode(Message.data, DBC_SIGNED, true, 8, 16, 0.0101972, 0, 2);
+            dbc_decode(Message.data, DBC_SIGNED, true, 8, 16, 0.01, 0, 2);
         Haltech.ECU.Pitch_Rate_degsec =
             dbc_decode(Message.data, DBC_SIGNED, true, 24, 16, 0.1, 0, 1);
         Haltech.ECU.Roll_Rate_degsec =
@@ -2338,6 +2408,8 @@ void haltech_CAN_Receive(CAN_Message Message) {
             dbc_decode(Message.data, DBC_UNSIGNED, true, 1, 1, 1, 0, 0);
         Haltech.ECU.Park_Light_State =
             dbc_decode(Message.data, DBC_UNSIGNED, true, 0, 1, 1, 0, 0);
+        Haltech.ECU.Engine_State = 
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 4, 1, 0, 0);
         break;
 
     case 0x6F6:
@@ -2405,6 +2477,35 @@ void haltech_CAN_Receive(CAN_Message Message) {
             dbc_decode(Message.data, DBC_SIGNED, true, 24, 8, 1, 0, 0);
         Haltech.ECU.Generic_Open_Loop_Motor_3_State =
             dbc_decode(Message.data, DBC_SIGNED, true, 32, 8, 1, 0, 0);
+        Haltech.ECU.Fuel_Level_1_percent = 
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 56, 16, 0.1, 0, 1);
+        break;
+
+    case 0x6F9:
+        Haltech.ECU.Fuel_Level_2_percent = 
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.1, 0, 1);
+        break;
+
+    case 0x6FF:
+        Haltech.ECU.Torque_Converter_Pressure_kPa = 
+            dbc_decode(Message.data, DBC_SIGNED, true, 8, 16, 1, 0, 0);
+        Haltech.ECU.Transfer_Case_Pressure_kPa = 
+            dbc_decode(Message.data, DBC_SIGNED, true, 24, 16, 1, 0, 0);
+        Haltech.ECU.Air_Conditioner_Pressure_kPa = 
+            dbc_decode(Message.data, DBC_SIGNED, true, 40, 16, 1, 0, 0);
+        Haltech.ECU.Power_Steering_Pressure_kPa = 
+            dbc_decode(Message.data, DBC_SIGNED, true, 56, 16, 1, 0, 0);
+        break;
+    
+    case 0x701:
+        Haltech.ECU.Fuel_Consumption_Average_Economy_lp100km = 
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 8, 16, 0.1, 0, 1);
+        Haltech.ECU.Fuel_Consumption_Instantaneous_Economy_lp100km = 
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 24, 16, 0.1, 0, 1);
+        Haltech.ECU.Air_Conditioner_Temperature_degC = 
+            dbc_decode(Message.data, DBC_SIGNED, true, 40, 16, 0.1, -273.2, 1);
+        Haltech.ECU.Fuel_Consumption_Instantaneous_Mileage_kml = 
+            dbc_decode(Message.data, DBC_UNSIGNED, true, 56, 16, 0.1, 0, 1);
         break;
 #endif
 

@@ -2,12 +2,13 @@
 #define HALTECH_H
 
 #include "backend_functions.h"
+#include <stdbool.h>
 #include <stdint.h>
 
 // Uncomment what peripherals you want to use //
 
 #define HALTECH_CAN CAN_1
-//#define ENABLE_ECU
+#define ENABLE_ECU
 //#define ENABLE_IO12A
 //#define ENABLE_IO12B
 //#define ENABLE_IO16A
@@ -28,20 +29,112 @@
 #define THIRDPARTYCAN CAN_3
 
 
+typedef enum {
+  CRUISE_DISABLED = 0,
+  CRUISE_INACTIVE = 1,
+  CRUISE_CRUISING = 2,
+  CRUISE_ACCELERATING = 3,
+  CRUISE_DECELERATING = 4,
+  CRUISE_CANCELLING = 5,
+  CRUISE_DISABLING = 6
+} HaltechCruiseControllerStateenum_t;
 
+typedef enum {
+  CUT_METHOD_NO_CUT = 0,
+  CUT_METHOD_FUEL = 1,
+  CUT_METHOD_IGNITION = 2,
+  CUT_METHOD_FUEL_AND_IGNITION = 3
+} HaltechCutMethodenum_t;
+
+typedef enum {
+  ENGINE_STATE_STOPPED = 0,
+  ENGINE_STATE_CRANKING = 1,
+  ENGINE_STATE_IDLING = 2,
+  ENGINE_STATE_RUNNING = 3,
+  ENGINE_STATE_LIMITING = 4,
+} HaltechEngineStateenum_t;
+
+typedef enum {
+  ENGINE_LIMITING_FUNC_NONE = 0,
+  ENGINE_LIMITING_FUNC_IMMOBILISER = 1,
+  ENGINE_LIMITING_FUNC_MAP_VERSION_ERROR = 2,
+  ENGINE_LIMITING_FUNC_ELECTRONIC_THROTTLE_ERROR = 3,
+  ENGINE_LIMITING_FUNC_ELECTRONIC_THROTTLE_REDUNDANCY_ERROR = 4,
+  ENGINE_LIMITING_FUNC_DECEL_CUT = 5,
+  ENGINE_LIMITING_FUNC_OVER_BOOST_CUT = 6,
+  ENGINE_LIMITING_FUNC_IGNITION_SWITCH = 7,
+  ENGINE_LIMITING_FUNC_ANTI_FLOOD = 8,
+  ENGINE_LIMITING_FUNC_LIMP_MODE = 9,
+  ENGINE_LIMITING_FUNC_ROTATIONAL_IDLE = 10,
+  ENGINE_LIMITING_FUNC_LAUNCH_CONTROL = 11,
+  ENGINE_LIMITING_FUNC_TORQUE_REDUCTION = 12,
+  ENGINE_LIMITING_FUNC_FLAT_SHIFT = 13,
+  ENGINE_LIMITING_FUNC_AUX_LIMITER = 14,
+  ENGINE_LIMITING_FUNC_MAIN_LIMITER = 15,
+  ENGINE_LIMITING_FUNC_SPEED_LIMITER = 16,
+  ENGINE_LIMITING_FUNC_SUPERVISOR_ERROR = 17,
+  ENGINE_LIMITING_FUNC_TURBO_TIMER = 18,
+  ENGINE_LIMITING_FUNC_ENGINE_PROTECTION = 19,
+  ENGINE_LIMITING_FUNC_FLOOD_CLEAR = 20,
+  ENGINE_LIMITING_FUNC_DIAGNOSTIC_TROUBLE_CODE = 21,
+  ENGINE_LIMITING_FUNC_RESERVED_22 = 22,
+  ENGINE_LIMITING_FUNC_KILL_SWITCH = 23,
+  ENGINE_LIMITING_FUNC_TRACTION_CONTROL = 24,
+  ENGINE_LIMITING_FUNC_ROLLING_ANTILAG = 25,
+  ENGINE_LIMITING_FUNC_TORQUE_MANAGEMENT = 26,
+  ENGINE_LIMITING_FUNC_TRANS_BRAKE_CONTROL = 27,
+  ENGINE_LIMITING_FUNC_INJECTION_SYSTEM_ERROR = 28,
+  ENGINE_LIMITING_FUNC_MAIN_SETUP_ERROR = 29,
+  ENGINE_LIMITING_FUNC_INJECTION_SYSTEM_DISABLE = 30,
+  ENGINE_LIMITING_FUNC_TORQUE_MODEL = 31,
+  ENGINE_LIMITING_FUNC_START_STOP_BUTTON = 32,
+  ENGINE_LIMITING_FUNC_THROTTLE_BLIP = 33,
+  ENGINE_LIMITING_FUNC_IMU_CALIBRATION = 34,
+  ENGINE_LIMITING_FUNC_ENGINE_BUMP = 35,
+  ENGINE_LIMITING_FUNC_ANTI_LAG = 36,
+  ENGINE_LIMITING_FUNC_CYLINDER_SHUTDOWN_MAX_EGT = 37,
+  ENGINE_LIMITING_FUNC_PIT_SPEED_LIMITER = 38,
+  ENGINE_LIMITING_FUNC_EMISSIONS_AGREEMENT = 39,
+} HaltechEngineLimitingFunctionenum_t;
+
+typedef enum {
+  MOTOR_STATE_INPUT_ERROR = -1,
+  MOTOR_STATE_DISABLED = 0,
+  MOTOR_STATE_CLOSED = 1,
+  MOTOR_STATE_OPENING = 2,
+  MOTOR_STATE_OPEN = 3,
+  MOTOR_STATE_CLOSING = 4,
+  MOTOR_STATE_PAUSED_PART_WAY = 5
+} OpenLoopMotorStateenum_t;
+
+typedef struct {
+  uint8_t Disable : 1; // 1 Disable
+  uint8_t Enable : 1; // 2 Enable
+  uint8_t Cancel : 1; // 4 Cancel
+  uint8_t Set : 1; // 8 Set
+  uint8_t Resume : 1; // 16 Resume
+  uint8_t Accel : 1; // 32 Accel
+  uint8_t Decel : 1; // 64 Decel
+  uint8_t Increment : 1; // 128 Increment
+  uint8_t Decrement : 1; // 256 Decrement
+  uint8_t RestingPosition : 1; // 512 Resting Position
+} HaltechCruiseControlInputState_t;
 
 #ifdef ENABLE_ECU
 typedef struct {
   float Absolute_Humidity_gm3;
   float Accel_Pedal_Position_percent;
+  float Air_Conditioner_Temperature_degC;
   float Air_Temperature_degC;
   float Ambient_Air_Temperature_degC;
   float Aux_1_Fuel_Pump_Duty_percent;
   float Aux_2_Fuel_Pump_Duty_percent;
   float Aux_3_Fuel_Pump_Duty_percent;
+  float Average_Fuel_Consumption_Mileage_KmL;
   float Barometric_Pressure_kPa;
   float Battery_Voltage_v;
   float Boost_Control_Output_percent;
+  float Boost_Pressure_Pre_InterCooler_kPa;
   float Brake_Pressure_Front_Ratio_percent;
   float Brake_Pressure_Rear_Ratio_percent;
   float Brake_Pressure_Rear_kPa;
@@ -86,9 +179,16 @@ typedef struct {
   float FR_Tire_Pressure_kPa;
   float Front_Tire_Pres_Target_kPa;
   float Fuel_Composition_percent;
-  float Fuel_Level_liters;
+  float Fuel_Consumption_Average_Economy_lp100km;
+  float Fuel_Consumption_Instantaneous_Economy_lp100km;
+  float Fuel_Consumption_Instantaneous_Mileage_kml;
+  float Fuel_Level_1_liters;
+  float Fuel_Level_1_percent;
+  float Fuel_Level_2_liters;
+  float Fuel_Level_2_percent;
   float Fuel_Pressure_kPa;
   float Fuel_Temperature_degC;
+  float Fuel_Volume_Estimated_Flow_ccmin;
   float Gearbox_Line_Pressure_kPa;
   float Gearbox_Oil_Temperature_degC;
   float Generic_Output_1_DC_percent;
@@ -144,10 +244,18 @@ typedef struct {
   float No2_Pressure_Sensor_2_kPa;
   float No2_Pressure_Sensor_3_kPa;
   float No2_Pressure_Sensor_4_kPa;
+  float Oil_Level_percent;
   float Oil_Pressure_kPa;
   float Oil_Temperature_degC;
   float Pitch_Rate_degsec;
+  float Pre_Intercooler_Temperature_degC;
   float Primary_Fuel_Pump_Duty_percent;
+  float Ride_Height_Sensor_Front_mm;
+  float Ride_Height_Sensor_Front_Raw_mm;
+  float Ride_Height_Sensor_Front_Derivative_mmdivs;
+  float Ride_Height_Sensor_Rear_mm;
+  float Ride_Height_Sensor_Rear_Raw_mm;
+  float Ride_Height_Sensor_Rear_Derivative_mmdivs;
   float RL_TPMS_Voltage_v;
   float RL_Tire_Pressure_kPa;
   float RR_TPMS_Voltage_v;
@@ -185,7 +293,9 @@ typedef struct {
   uint32_t Total_Fuel_Used_cc;
   uint32_t Turbo_Speed_Sensor_1_rpm;
   int16_t Brake_Pressure_Difference_kPa;
-  uint16_t Cruise_Control_Input_State : 9;
+  uint16_t Air_Conditioner_Pressure_kPa;
+  uint16_t CombinedGear;
+  HaltechCruiseControlInputState_t Cruise_Control_Input_State;
   uint16_t Driveshaft_rpm;
   uint16_t Engine_Limiter_Max_rpm;
   uint16_t Engine_Protection_DTC;
@@ -194,19 +304,26 @@ typedef struct {
   uint16_t FR_Tire_Temp_degC;
   uint16_t Fuel_Flow_Return_ccmin;
   uint16_t Fuel_Flow_ccmin;
+  uint16_t Generic_Output_1_Duty_Percent;
+  uint16_t Generic_Output_2_Duty_Percent;
+  uint16_t Generic_Output_3_Duty_Percent;
+  uint16_t Generic_Output_4_Duty_Percent;
   uint16_t Launch_Control_End_rpm;
   uint16_t RL_Tire_Temp_degC;
   uint16_t RR_Tire_Temp_degC;
+  uint16_t Power_Steering_Pressure_kPa;
+  uint16_t Torque_Converter_Pressure_kPa;
+  uint16_t Transfer_Case_Pressure_kPa;
   uint16_t Trigger_Sync_Level;
   uint16_t Trigger_System_Error_Count;
   uint16_t Trigger_Counter;
   int8_t Exhaust_Cutout_State : 4;
   int8_t Gear : 5;
   int8_t Gear_Selector_Position : 5;
-  int8_t Generic_Open_Loop_Motor_1_State : 4;
-  int8_t Generic_Open_Loop_Motor_2_State : 4;
-  int8_t Generic_Open_Loop_Motor_3_State : 4;
-  int8_t Nitrous_Bottle_Opener_State : 4;
+  OpenLoopMotorStateenum_t Generic_Open_Loop_Motor_1_State : 4;
+  OpenLoopMotorStateenum_t Generic_Open_Loop_Motor_2_State : 4;
+  OpenLoopMotorStateenum_t Generic_Open_Loop_Motor_3_State : 4;
+  OpenLoopMotorStateenum_t Nitrous_Bottle_Opener_State : 4;
   int8_t Rotary_Trimpot_1 : 5;
   int8_t Rotary_Trimpot_2 : 5;
   int8_t Rotary_Trimpot_3 : 5;
@@ -226,12 +343,13 @@ typedef struct {
   uint8_t Brake_Pedal_Switch : 1;
   uint8_t Check_Engine_Light : 1;
   uint8_t Clutch_Switch : 1;
-  uint8_t Cruise_Controller_State : 3;
-  uint8_t Cut_Percentage_Function : 7;
-  uint8_t Cut_Percentage_Method : 2;
+  uint8_t Cruise_Controller_State : 3; // HaltechCruiseControllerState_t
+  HaltechEngineLimitingFunctionenum_t Cut_Percentage_Function : 7;
+  HaltechCutMethodenum_t Cut_Percentage_Method : 2; // HaltechCutMethod_t
   uint8_t Decel_Cut_Active : 1;
-  uint8_t Engine_Limiter_Function : 7;
-  uint8_t Engine_Limiter_Method : 2;
+  HaltechEngineLimitingFunctionenum_t Engine_Limiter_Function : 7;
+  HaltechCutMethodenum_t Engine_Limiter_Method : 2;
+  HaltechEngineStateenum_t Engine_State : 3;
   uint8_t Engine_Limiting_Active : 1;
   uint8_t Engine_Protection_Level : 2;
   uint8_t FL_Tire_Leaking : 1;
@@ -295,8 +413,8 @@ typedef struct {
   uint8_t Pit_Limiter_Switch_State : 1;
   uint8_t Primary_Fuel_Pump_Output_State : 1;
   uint8_t RL_Tire_Leaking : 1;
-  uint8_t RPM_Limiter_Function : 7;
-  uint8_t RPM_Limiter_Method : 2;
+  HaltechEngineLimitingFunctionenum_t RPM_Limiter_Function : 7;
+  HaltechCutMethodenum_t RPM_Limiter_Method : 2;
   uint8_t RR_Tire_Leaking : 1;
   uint8_t Reverse_Switch : 1;
   uint8_t Right_Indicator_State : 1;
